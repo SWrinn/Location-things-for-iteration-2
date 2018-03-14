@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/locationOptions"
+        android:title="Location">
+        <menu>
+            <item
+                android:id="@+id/locationGPS"
+                android:title="GPS"/>
+            <item
+                android:id="@+id/locationAddress"
+                android:title="Address"/>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/destination"
+        android:title="Destination">
+        <menu>
+            <item
+                android:id="@+id/destinationAddress"
+                android:title="Address"/>
+        </menu>
+    </item>
+</menu>
