@@ -1,6 +1,7 @@
 package com.example.marko.tester;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -15,15 +16,21 @@ public class AddressActivity extends AppCompatActivity {
         setContentView(R.layout.activity_address);
     }
 
-    public void addressEntered(View view){
-        //do something when the button is pushed
-        //gather the address from the msg box
-        Intent intent = new Intent(this, MapsActivity.class);
+    public void setDestination(View view){
+        Intent intent = getIntent();
+        String origin = intent.getStringExtra(MapsActivity.EXTRA_LOCATION);
         EditText editText = (EditText) findViewById(R.id.editText);
-        String address = editText.getText().toString();
-        intent.putExtra(EXTRA_MESSAGE, address);
+        String loc = editText.getText().toString();
+        Uri eng = Uri.parse("https://www.google.com/maps/dir/?api=1&origin=" + origin + "&destination=" + "43.657731, -79.377236" +"&travelmode=walking");
 
-        //go back to the maps page
+        if(loc.equals("eng")|| loc.equals("engineering") || loc.equals("george vari engineering")) {
+            getRoute(view, eng);
+        }
+
+    }
+
+    public void getRoute(View view, Uri uri){
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
         startActivity(intent);
     }
 }

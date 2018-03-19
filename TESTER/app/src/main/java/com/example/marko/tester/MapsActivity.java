@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -32,10 +33,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
-    private Location startingLocation;
-
+    private String origin;
+    public static final String EXTRA_LOCATION = "com.example.TESTER.LOCATION";
     static final int PERMISSIONS_FINE_LOCATION = 1;
-    static final int PERMISSIONS_INTERNET = 1;
 
 
     @Override
@@ -50,11 +50,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         //for getting last known (current)location:
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        Intent userAddress = getIntent();
-        if(userAddress != null){
-            //an address has been passed in
-            this.getUserAddress(userAddress); //will extract the address from what is passed
-        }
     }
 
     @Override
@@ -74,18 +69,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         //noinspection SimplifiableIfStatement
         if (id == R.id.locationOptions) {
             return true;
-        }else if (id == R.id.locationGPS){
+        }else if (id == R.id.locationGPS){ // this is most likely not needed
             this.currentLoc(); //get current location <- for now, slo shows the location
+            String destination = "43.7598021, -79.31616"; // ******************************************************************************** this is just hardcoded
+            Uri uri = Uri.parse("https://www.google.com/maps/dir/?api=1&origin=" + origin + "&destination=" + destination +"&travelmode=walking");
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
             return true;
         }else if (id == R.id.locationAddress){
-            //check permission for internet first
-            if(ActivityCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
-                    == PackageManager.PERMISSION_GRANTED){
-                startActivity(new Intent(this, AddressActivity.class)); //go to a different screen to input the address
-            }else{
-                //ask permission to use internet
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET}, PERMISSIONS_INTERNET);
-            }
+            this.currentLoc(); // get the current location through GPS
+            startActivity(new Intent(this, AddressActivity.class).putExtra(EXTRA_LOCATION, origin)); //go to a different screen to input the address
             return true;
         }else if(id == R.id.destination) {
             return true;
@@ -111,16 +104,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
+        // Add a marker in Sydney and move the camera ********** THIS IS JUST DEFAULT
         LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
     public void currentLoc(){
-
-        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED){
+        //check for permission to access location
+       if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
 
             mFusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
                 @Override
@@ -128,10 +120,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     // Got last known location. In some rare situations this can be null.
                     if (location != null) {
                         // This is where to put whatever to do once the location has been acquired
-                        startingLocation = location;
-                        //this is to make sure the location is being retrieved
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("You are here."));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+                        origin = location.getLatitude() + ", " + location.getLongitude(); //string of coordinates
                     }
                 }
             });
@@ -140,31 +129,4 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public void getUserAddress(Intent userAddress){
-        //this is what to do to get the address
-        String address = userAddress.getStringExtra(AddressActivity.EXTRA_MESSAGE);
-        //now, need to figure out what to do with the given address
-        this.addressEntered(address);
-    }
-
-    public void addressEntered(String userAddress){
-        //this method is called when an address is to be entered
-        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-        List<Address> addresses;
-        try{
-            addresses = geocoder.getFromLocationName(userAddress, 1);
-            LatLng foundIt = new LatLng(addresses.get(0).getLatitude(), addresses.get(0).getLongitude());
-            //place marker & move camera
-            mMap.addMarker(new MarkerOptions().position(foundIt).title("You are here."));
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(foundIt));
-
-        }catch(IllegalArgumentException e){
-            //no address has been given
-        }catch(IOException e){
-            //network is unavailable, or really anything else to do with IO
-        }
-
-
-
-    }
 }

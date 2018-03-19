@@ -13,8 +13,8 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:ems="10"
+        android:hint="Enter an address"
         android:inputType="textPostalAddress"
-        android:text="@string/enter_address"
         app:layout_constraintEnd_toStartOf="@+id/button2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -23,7 +23,7 @@
         android:id="@+id/button2"
         android:layout_width="105dp"
         android:layout_height="50dp"
-        android:onClick="addressEntered"
+        android:onClick="setDestination"
         android:text="@string/address_button"
         app:layout_constraintBaseline_toBaselineOf="@+id/editText"
         app:layout_constraintEnd_toEndOf="parent"
